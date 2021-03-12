@@ -9,11 +9,9 @@ class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = -1
 
-    var question: String = ""
+    var text: String = ""
 
-    var firstAnswer: String = ""
-
-    var secondAnswer: String = ""
+    var multiple: Boolean = false
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")

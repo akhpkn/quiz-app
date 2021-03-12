@@ -10,4 +10,8 @@ class Quiz {
     var id: Long = -1
 
     var title: String = ""
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    var author: User? = null
 }

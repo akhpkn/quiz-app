@@ -1,5 +1,6 @@
 package quiz.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
 
 @Entity
@@ -17,6 +18,7 @@ class User {
     @JoinTable(name = "user_roles",
         joinColumns = [JoinColumn(name = "user_id", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "role_id", referencedColumnName = "id")])
+    @JsonIgnore
     var roles: Set<Role> = HashSet()
 
     constructor(username: String, password: String) {

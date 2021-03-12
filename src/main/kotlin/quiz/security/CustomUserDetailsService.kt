@@ -16,10 +16,8 @@ class CustomUserDetailsService(private var userRepository: UserRepository) : Use
     }
 
     fun loadUserById(userId: Long): UserDetails {
-        val user = userRepository.findById(userId)
-        if (user.isEmpty) {
-            throw UsernameNotFoundException("Пользователь с id = $userId не найден")
-        }
-        return CustomUserDetails.create(user.get())
+        val user = userRepository.findUserById(userId)
+            ?: throw UsernameNotFoundException("Пользователь с id = $userId не найден")
+        return CustomUserDetails.create(user)
     }
 }

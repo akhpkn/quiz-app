@@ -68,40 +68,40 @@ class QuizService(
         }
     }
 
-    fun getAllQuizzes(): List<QuizDto> {
+    fun getQuizzes(): List<QuizDto> {
         val answers: List<Answer> = answerRepository.findAllAnswers()
-        val answerByQuestionMap: Map<Question, List<Answer>> = answers.groupBy { it.question }
+        val answersByQuestionMap: Map<Question, List<Answer>> = answers.groupBy { it.question }
 
-        val quizDtoList: MutableList<QuizDto> = ArrayList()
-        val questionsByQuizMap: MutableMap<Quiz, MutableList<Question>> = LinkedHashMap()
-        answerByQuestionMap.forEach { (key, _) ->
-            if (questionsByQuizMap[key.quiz] == null) {
-                questionsByQuizMap[key.quiz] = ArrayList()
+        return answersByQuestionMap
+            .keys
+            .groupBy { it.quiz }
+            .map { (quiz, questions) ->
+                val questionDtoList = questions.map { question ->
+                    val answerDtoList: List<AnswerDto> =
+                        answersByQuestionMap[question]?.map { AnswerDto(it.id, it.text, it.correct) } ?: ArrayList()
+                    QuestionDto(question.id, question.text, question.multiple, answerDtoList)
+                }
+                val author = UserDto(quiz.author.id, quiz.author.username)
+                QuizDto(quiz.id, quiz.title, author, questionDtoList)
             }
-            questionsByQuizMap[key.quiz]?.add(key)
-        }
-
-        questionsByQuizMap.forEach { (key, value) ->
-            val questionDtoList: MutableList<QuestionDto> = ArrayList()
-            value.forEach { question ->
-                val answerDtoList: List<AnswerDto> =
-                    answerByQuestionMap[question]?.map { AnswerDto(it.id, it.text, it.correct) } ?: ArrayList()
-
-                val questionDto = QuestionDto(question.id, question.text, question.multiple, answerDtoList)
-                questionDtoList.add(questionDto)
-            }
-            val author = UserDto(key.author.id, key.author.username)
-            val quizDto = QuizDto(key.id, key.title, author, questionDtoList)
-            quizDtoList.add(quizDto)
-        }
-
-        return quizDtoList
+            .toList()
     }
 
     fun getBlankQuizzes(): List<BlankQuizDto> {
         return quizRepository.findAllQuizzes().map { quiz ->
             BlankQuizDto(quiz.id, quiz.title, UserDto(quiz.author.id, quiz.author.username))
         }
+    }
+
+    fun getQuizQuestions(quizId: Long): List<QuestionDto> {
+        val answers: List<Answer> = answerRepository.findAnswersByQuizId(quizId)
+        return answers
+            .groupBy { it.question }
+            .map { (question, answerList) ->
+                val answerDtoList = answerList.map { AnswerDto(it.id, it.text, it.correct) }
+                QuestionDto(question.id, question.text, question.multiple, answerDtoList)
+            }
+            .toList()
     }
 
     private fun getCurrentUser(currentUser: CustomUserDetails?): User {

@@ -2,6 +2,7 @@ package quiz.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -78,6 +79,8 @@ open class SecurityConfig(
                 "/swagger-ui.html",
                 "/webjars/**"
             )
+            ?.permitAll()
+            ?.antMatchers(HttpMethod.GET, "/api/quiz/**")
             ?.permitAll()
             ?.anyRequest()
             ?.authenticated()

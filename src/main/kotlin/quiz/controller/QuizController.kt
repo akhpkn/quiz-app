@@ -28,7 +28,7 @@ class QuizController(private val quizService: QuizService) {
 
     @GetMapping("/all")
     fun getQuizzes(): List<QuizDto> {
-        return quizService.getAllQuizzes()
+        return quizService.getQuizzes()
     }
 
     @GetMapping("/all-blank")
@@ -36,11 +36,18 @@ class QuizController(private val quizService: QuizService) {
         return quizService.getBlankQuizzes()
     }
 
+    @GetMapping("/{quizId}/questions")
+    fun getQuizQuestions(
+        @PathVariable("quizId") quizId: Long,
+    ): List<QuestionDto> {
+        return quizService.getQuizQuestions(quizId)
+    }
+
     @PostMapping("/{quizId}/question")
     fun addQuestionToQuiz(
         @PathVariable("quizId") quizId: Long,
         @RequestBody questionCreationRequest: QuestionCreationRequest,
-        @CurrentUser currentUser: CustomUserDetails
+        @CurrentUser currentUser: CustomUserDetails,
     ) {
         quizService.addQuestion(quizId, questionCreationRequest, currentUser)
     }

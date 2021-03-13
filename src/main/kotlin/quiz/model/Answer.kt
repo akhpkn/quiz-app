@@ -4,16 +4,16 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "answers")
-class Answer {
-    @Id
-    @GeneratedValue
-    var id: Long = -1
+class Answer(
+    var text: String,
 
-    var text: String = ""
-
-    var correct: Boolean = false
+    var correct: Boolean,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
-    var question: Question? = null
+    var question: Question,
+) {
+    @Id
+    @GeneratedValue
+    var id: Long = -1
 }

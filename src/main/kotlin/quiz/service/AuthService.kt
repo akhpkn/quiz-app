@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import quiz.dto.JwtAuthenticationResponse
 import quiz.dto.SignInRequest
 import quiz.dto.SignUpRequest
+import quiz.dto.UserDto
 import quiz.exception.UserAlreadyExistsException
 import quiz.exception.WrongUsernameOrPasswordException
 import quiz.model.Role
@@ -29,11 +30,10 @@ class AuthService(
     private val tokenProvider: JwtTokenProvider,
 ) {
 
-    fun signUp(signUpRequest: SignUpRequest): User {
+    fun signUp(signUpRequest: SignUpRequest): UserDto {
         if (userRepository.existsByUsername(signUpRequest.username)) {
             throw UserAlreadyExistsException(signUpRequest.username)
         }
-        val user = User(signUpRequest.username, signUpRequest.password)
 
         var roleUser = roleRepository.findByName(RoleName.ROLE_USER)
         val userRole: Role
@@ -47,11 +47,15 @@ class AuthService(
             roleRepository.save(roleAdmin)
             userRole = roleRepository.save(roleUser)
         }
-        user.roles = Collections.singleton(userRole)
 
-        user.password = passwordEncoder.encode(user.password)
+        val user = User(
+            signUpRequest.username,
+            passwordEncoder.encode(signUpRequest.password),
+            Collections.singleton(userRole)
+        )
 
-        return userRepository.save(user)
+        val savedUser = userRepository.save(user)
+        return UserDto(savedUser.id, savedUser.username)
     }
 
     fun signIn(signInRequest: SignInRequest): JwtAuthenticationResponse {
@@ -60,7 +64,8 @@ class AuthService(
             authentication = authenticationManager.authenticate(
                 UsernamePasswordAuthenticationToken(
                     signInRequest.username,
-                    signInRequest.password)
+                    signInRequest.password
+                )
             )
         } catch (ex: BadCredentialsException) {
             throw WrongUsernameOrPasswordException()

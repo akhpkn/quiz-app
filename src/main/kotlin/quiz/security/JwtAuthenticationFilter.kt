@@ -22,16 +22,19 @@ class JwtAuthenticationFilter(
 
     private val logger: Logger = LoggerFactory.getLogger(JwtAuthenticationFilter::class.java)
 
-    override fun doFilterInternal(request: HttpServletRequest,
-                                  response: HttpServletResponse, filterChain: FilterChain) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse, filterChain: FilterChain
+    ) {
         try {
             val jwt = getJwtFromRequest(request)
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                val userId =tokenProvider.getUserIdFromJwt(jwt)
+                val userId = tokenProvider.getUserIdFromJwt(jwt)
 
                 val userDetails = customUserDetailsService.loadUserById(userId)
-                val authentication = UsernamePasswordAuthenticationToken(userDetails,
-                    null, userDetails.authorities)
+                val authentication = UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.authorities
+                )
                 authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
 
                 SecurityContextHolder.getContext().authentication = authentication

@@ -1,10 +1,8 @@
 package quiz.controller
 
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import quiz.dto.QuizCreationRequest
+import quiz.dto.QuizDto
 import quiz.security.CurrentUser
 import quiz.security.CustomUserDetails
 import quiz.service.QuizService
@@ -14,8 +12,15 @@ import quiz.service.QuizService
 class QuizController(private val quizService: QuizService) {
 
     @PostMapping("/create")
-    fun createQuiz(@RequestBody quizCreationRequest: QuizCreationRequest,
-                   @CurrentUser currentUser: CustomUserDetails) {
+    fun createQuiz(
+        @RequestBody quizCreationRequest: QuizCreationRequest,
+        @CurrentUser currentUser: CustomUserDetails
+    ) {
         quizService.createQuiz(quizCreationRequest, currentUser)
+    }
+
+    @GetMapping("/all")
+    fun getAllQuizzes(): List<QuizDto> {
+        return quizService.getAllQuizzes()
     }
 }

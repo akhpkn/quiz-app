@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 import quiz.dto.JwtAuthenticationResponse
 import quiz.dto.SignInRequest
 import quiz.dto.SignUpRequest
+import quiz.dto.UserDto
 import quiz.model.User
 import quiz.service.AuthService
 
@@ -15,7 +16,7 @@ import quiz.service.AuthService
 class AuthController(private val authService: AuthService) {
 
     @PostMapping("/signup")
-    fun signUp(@RequestBody signUpRequest: SignUpRequest): User {
+    fun signUp(@RequestBody signUpRequest: SignUpRequest): UserDto {
         return authService.signUp(signUpRequest)
     }
 

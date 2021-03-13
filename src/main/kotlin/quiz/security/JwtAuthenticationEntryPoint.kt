@@ -7,11 +7,13 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class JwtAuthenticationEntryPoint: AuthenticationEntryPoint {
+class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
 
-    override fun commence(request: HttpServletRequest?,
-                          response: HttpServletResponse?,
-                          exception: AuthenticationException?) {
+    override fun commence(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        exception: AuthenticationException?
+    ) {
         response?.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception?.message)
     }
 }

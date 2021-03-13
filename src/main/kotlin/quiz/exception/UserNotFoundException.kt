@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import java.lang.RuntimeException
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-class UserNotFoundException: RuntimeException {
+class UserNotFoundException : RuntimeException {
     constructor() : super("Пользователь не найден")
 
     constructor(id: Long) : super("Пользователь с id = $id не найден")

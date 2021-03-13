@@ -64,7 +64,8 @@ open class SecurityConfig(
                 "/**/*.jpg",
                 "/**/*.html",
                 "/**/*.css",
-                "/**/*.js")
+                "/**/*.js"
+            )
             ?.permitAll()
             ?.antMatchers(
                 "/api/auth/**",
@@ -75,7 +76,8 @@ open class SecurityConfig(
                 "/configuration/ui",
                 "/swagger-resources",
                 "/swagger-ui.html",
-                "/webjars/**")
+                "/webjars/**"
+            )
             ?.permitAll()
             ?.anyRequest()
             ?.authenticated()

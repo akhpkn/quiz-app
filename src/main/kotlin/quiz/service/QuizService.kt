@@ -1,15 +1,15 @@
 package quiz.service
 
 import org.springframework.stereotype.Service
-import quiz.dto.AnswerDto
-import quiz.dto.QuestionDto
-import quiz.dto.QuizCreationRequest
-import quiz.dto.QuizDto
+import quiz.dto.*
 import quiz.exception.NoAuthException
+import quiz.exception.QuizNotFoundException
+import quiz.exception.QuizWriteAccessNotAllowedException
 import quiz.exception.UserNotFoundException
 import quiz.model.Answer
 import quiz.model.Question
 import quiz.model.Quiz
+import quiz.model.User
 import quiz.repository.AnswerRepository
 import quiz.repository.QuestionRepository
 import quiz.repository.QuizRepository
@@ -25,30 +25,46 @@ class QuizService(
 ) {
 
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?) {
-        if (currentUser == null) {
-            throw NoAuthException()
-        }
-        val user = userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
+        val user: User = getCurrentUser(currentUser)
 
         val quiz = Quiz(quizCreationRequest.title, user)
-
         val savedQuiz = quizRepository.save(quiz)
-
-        val questions: MutableList<Question> = ArrayList()
-        val answers: MutableList<Answer> = ArrayList()
 
         quizCreationRequest.questions.forEach { questionRequest ->
             val question = Question(questionRequest.text, questionRequest.multiple, savedQuiz)
-
             val savedQuestion = questionRepository.save(question)
-            questions.add(savedQuestion)
 
             questionRequest.answers.forEach { answerRequest ->
                 val answer = Answer(answerRequest.text, answerRequest.correct, savedQuestion)
-
-                val savedAnswer = answerRepository.save(answer)
-                answers.add(savedAnswer)
+                answerRepository.save(answer)
             }
+        }
+    }
+
+    fun createBlankQuiz(blankQuizRequest: BlankQuizRequest, currentUser: CustomUserDetails?): BlankQuizDto {
+        val user: User = getCurrentUser(currentUser)
+
+        val quiz = Quiz(blankQuizRequest.title, user)
+        val savedQuiz = quizRepository.save(quiz)
+
+        return BlankQuizDto(savedQuiz.id, savedQuiz.title, UserDto(user.id, user.username))
+    }
+
+    fun addQuestion(quizId: Long, questionCreationRequest: QuestionCreationRequest, currentUser: CustomUserDetails?) {
+        val user: User = getCurrentUser(currentUser)
+
+        val quiz = quizRepository.findQuizById(quizId) ?: throw QuizNotFoundException(quizId)
+
+        if (quiz.author != user) {
+            throw QuizWriteAccessNotAllowedException(user.username, quizId)
+        }
+
+        val question = Question(questionCreationRequest.text, questionCreationRequest.multiple, quiz)
+        val savedQuestion = questionRepository.save(question)
+
+        questionCreationRequest.answers.forEach { answerRequest ->
+            val answer = Answer(answerRequest.text, answerRequest.correct, savedQuestion)
+            answerRepository.save(answer)
         }
     }
 
@@ -74,10 +90,24 @@ class QuizService(
                 val questionDto = QuestionDto(question.id, question.text, question.multiple, answerDtoList)
                 questionDtoList.add(questionDto)
             }
-            val quizDto = QuizDto(key.id, key.title, key.author, questionDtoList)
+            val author = UserDto(key.author.id, key.author.username)
+            val quizDto = QuizDto(key.id, key.title, author, questionDtoList)
             quizDtoList.add(quizDto)
         }
 
         return quizDtoList
+    }
+
+    fun getBlankQuizzes(): List<BlankQuizDto> {
+        return quizRepository.findAllQuizzes().map { quiz ->
+            BlankQuizDto(quiz.id, quiz.title, UserDto(quiz.author.id, quiz.author.username))
+        }
+    }
+
+    private fun getCurrentUser(currentUser: CustomUserDetails?): User {
+        if (currentUser == null) {
+            throw NoAuthException()
+        }
+        return userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
     }
 }

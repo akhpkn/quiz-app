@@ -6,6 +6,7 @@ import quiz.model.Quiz
 
 interface QuizRepository : JpaRepository<Quiz, Long> {
 
+    @Query("select q from Quiz q join fetch q.author where q.id = ?1")
     fun findQuizById(id: Long): Quiz?
 
     @Query("select q from Quiz q join fetch q.author")

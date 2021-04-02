@@ -13,6 +13,7 @@ import quiz.dto.SignUpRequest
 import quiz.dto.UserDto
 import quiz.exception.UserAlreadyExistsException
 import quiz.exception.WrongUsernameOrPasswordException
+import quiz.mapper.DtoMapper
 import quiz.model.Role
 import quiz.model.RoleName
 import quiz.model.User
@@ -28,6 +29,7 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val authenticationManager: AuthenticationManager,
     private val tokenProvider: JwtTokenProvider,
+    private val dtoMapper: DtoMapper,
 ) {
 
     fun signUp(signUpRequest: SignUpRequest): UserDto {
@@ -55,7 +57,7 @@ class AuthService(
         )
 
         val savedUser = userRepository.save(user)
-        return UserDto(savedUser.id, savedUser.username)
+        return dtoMapper.userToDto(savedUser)
     }
 
     fun signIn(signInRequest: SignInRequest): JwtAuthenticationResponse {

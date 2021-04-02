@@ -6,6 +6,7 @@ import quiz.exception.NoAuthException
 import quiz.exception.QuizNotFoundException
 import quiz.exception.QuizWriteAccessNotAllowedException
 import quiz.exception.UserNotFoundException
+import quiz.mapper.DtoMapper
 import quiz.model.Answer
 import quiz.model.Question
 import quiz.model.Quiz
@@ -22,6 +23,7 @@ class QuizService(
     private val quizRepository: QuizRepository,
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
+    private val dtoMapper: DtoMapper,
 ) {
 
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?) {
@@ -47,7 +49,7 @@ class QuizService(
         val quiz = Quiz(blankQuizRequest.title, user)
         val savedQuiz = quizRepository.save(quiz)
 
-        return BlankQuizDto(savedQuiz.id, savedQuiz.title, UserDto(user.id, user.username))
+        return dtoMapper.quizToBlankDto(savedQuiz)
     }
 
     fun addQuestion(quizId: Long, questionCreationRequest: QuestionCreationRequest, currentUser: CustomUserDetails?) {
@@ -88,19 +90,14 @@ class QuizService(
     }
 
     fun getBlankQuizzes(): List<BlankQuizDto> {
-        return quizRepository.findAllQuizzes().map { quiz ->
-            BlankQuizDto(quiz.id, quiz.title, UserDto(quiz.author.id, quiz.author.username))
-        }
+        return quizRepository.findAllQuizzes().map { dtoMapper.quizToBlankDto(it) }
     }
 
     fun getQuizQuestions(quizId: Long): List<QuestionDto> {
         val answers: List<Answer> = answerRepository.findAnswersByQuizId(quizId)
         return answers
             .groupBy { it.question }
-            .map { (question, answerList) ->
-                val answerDtoList = answerList.map { AnswerDto(it.id, it.text, it.correct) }
-                QuestionDto(question.id, question.text, question.multiple, answerDtoList)
-            }
+            .map { (question, answerList) -> dtoMapper.questionToDto(question, answerList) }
             .toList()
     }
 

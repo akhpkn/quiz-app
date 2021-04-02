@@ -1,8 +1,8 @@
 package quiz.dto
 
 class QuizDto(
-    val quizId: Long,
-    val title: String,
-    val author: UserDto,
-    val questions: List<QuestionDto>,
+    var quizId: Long,
+    var title: String,
+    var author: UserDto,
+    var questions: List<QuestionDto>,
 )

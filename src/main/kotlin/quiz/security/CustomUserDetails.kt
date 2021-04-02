@@ -26,7 +26,7 @@ class CustomUserDetails : UserDetails {
     companion object Factory {
         fun create(user: User): CustomUserDetails {
             val authorities: List<GrantedAuthority> = user.roles
-                .map { SimpleGrantedAuthority(it.name?.name) }
+                .map { SimpleGrantedAuthority(it.name.name) }
                 .toList()
 
             return CustomUserDetails(user.id, user.username, user.password, authorities)

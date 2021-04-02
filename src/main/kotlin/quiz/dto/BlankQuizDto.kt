@@ -1,7 +1,7 @@
 package quiz.dto
 
 class BlankQuizDto(
-    val quizId: Long,
-    val title: String,
-    val author: UserDto,
+    var quizId: Long,
+    var title: String,
+    var author: UserDto,
 )

@@ -1,6 +1,6 @@
 package quiz.dto
 
 class UserDto(
-    val userId: Long,
-    val username: String,
+    var userId: Long,
+    var username: String,
 )

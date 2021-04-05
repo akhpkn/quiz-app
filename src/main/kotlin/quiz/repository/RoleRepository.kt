@@ -1,8 +1,8 @@
 package quiz.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import quiz.enums.RoleName
 import quiz.model.Role
-import quiz.model.RoleName
 
 interface RoleRepository : JpaRepository<Role, Long> {
 

@@ -1,6 +1,7 @@
 package quiz.model
 
 import org.hibernate.annotations.NaturalId
+import quiz.enums.RoleName
 import javax.persistence.*
 
 @Entity

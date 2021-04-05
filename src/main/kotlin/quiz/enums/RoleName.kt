@@ -1,4 +1,4 @@
-package quiz.model
+package quiz.enums
 
 enum class RoleName {
     ROLE_USER,

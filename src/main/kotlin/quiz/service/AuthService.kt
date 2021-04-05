@@ -11,11 +11,11 @@ import quiz.dto.JwtAuthenticationResponse
 import quiz.dto.SignInRequest
 import quiz.dto.SignUpRequest
 import quiz.dto.UserDto
+import quiz.enums.RoleName
 import quiz.exception.UserAlreadyExistsException
 import quiz.exception.WrongUsernameOrPasswordException
 import quiz.mapper.DtoMapper
 import quiz.model.Role
-import quiz.model.RoleName
 import quiz.model.User
 import quiz.repository.RoleRepository
 import quiz.repository.UserRepository

@@ -36,6 +36,11 @@ class QuizController(private val quizService: QuizService) {
         return quizService.getBlankQuizzes()
     }
 
+    @GetMapping
+    fun getBlankQuizzesByAuthor(@RequestParam("authorId") authorId: Long): List<BlankQuizDto> {
+        return quizService.getBlankQuizzesByAuthor(authorId)
+    }
+
     @GetMapping("/{quizId}/questions")
     fun getQuizQuestions(
         @PathVariable("quizId") quizId: Long,

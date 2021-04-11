@@ -1,34 +1,23 @@
 package quiz.service
 
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import quiz.dto.JwtAuthenticationResponse
 import quiz.dto.SignInRequest
 import quiz.dto.SignUpRequest
 import quiz.dto.UserDto
 import quiz.enums.RoleName
 import quiz.exception.UserAlreadyExistsException
-import quiz.exception.WrongUsernameOrPasswordException
 import quiz.mapper.DtoMapper
 import quiz.model.Role
-import quiz.model.User
 import quiz.repository.RoleRepository
 import quiz.repository.UserRepository
-import quiz.security.JwtTokenProvider
+import quiz.security.AuthenticationProvider
 import java.util.*
 
 @Service
 class AuthService(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
-    private val passwordEncoder: PasswordEncoder,
-    private val authenticationManager: AuthenticationManager,
-    private val tokenProvider: JwtTokenProvider,
+    private val authenticationProvider: AuthenticationProvider,
     private val dtoMapper: DtoMapper,
 ) {
 
@@ -50,9 +39,10 @@ class AuthService(
             userRole = roleRepository.save(roleUser)
         }
 
-        val user = User(
+        val user = authenticationProvider.userWithEncodedPassword(
             signUpRequest.username,
-            passwordEncoder.encode(signUpRequest.password),
+            signUpRequest.password,
+            signUpRequest.name,
             Collections.singleton(userRole)
         )
 
@@ -60,22 +50,6 @@ class AuthService(
         return dtoMapper.userToDto(savedUser)
     }
 
-    fun signIn(signInRequest: SignInRequest): JwtAuthenticationResponse {
-        val authentication: Authentication
-        try {
-            authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(
-                    signInRequest.username,
-                    signInRequest.password
-                )
-            )
-        } catch (ex: BadCredentialsException) {
-            throw WrongUsernameOrPasswordException()
-        }
-
-        SecurityContextHolder.getContext().authentication = authentication
-
-        val jwtToken = tokenProvider.generateToken(authentication)
-        return JwtAuthenticationResponse(jwtToken)
-    }
+    fun signIn(signInRequest: SignInRequest) =
+        authenticationProvider.authenticate(signInRequest.username, signInRequest.password)
 }

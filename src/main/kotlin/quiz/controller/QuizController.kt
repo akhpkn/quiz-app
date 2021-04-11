@@ -56,4 +56,17 @@ class QuizController(private val quizService: QuizService) {
     ) {
         quizService.addQuestion(quizId, questionCreationRequest, currentUser)
     }
+
+    @GetMapping("/{quizId}/exists")
+    fun existsById(@PathVariable("quizId") quizId: Long): Boolean {
+        return quizService.existsById(quizId)
+    }
+
+    @PostMapping("/access")
+    fun accessWithCode(
+        @RequestParam("code") code: String,
+        @RequestParam("name") name: String,
+    ): JwtAuthenticationResponse {
+        return quizService.accessWithCode(code, name)
+    }
 }

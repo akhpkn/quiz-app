@@ -10,6 +10,8 @@ class Quiz(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     var author: User,
+
+    var code: String,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package quiz.service
 
+import org.apache.commons.text.RandomStringGenerator
 import org.springframework.stereotype.Service
 import quiz.dto.*
 import quiz.exception.NoAuthException
@@ -15,6 +16,7 @@ import quiz.repository.AnswerRepository
 import quiz.repository.QuestionRepository
 import quiz.repository.QuizRepository
 import quiz.repository.UserRepository
+import quiz.security.AuthenticationProvider
 import quiz.security.CustomUserDetails
 
 @Service
@@ -23,13 +25,17 @@ class QuizService(
     private val quizRepository: QuizRepository,
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
+    private val authenticationProvider: AuthenticationProvider,
     private val dtoMapper: DtoMapper,
 ) {
 
+    private val usedCodes = quizRepository.getCodes()
+
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?) {
         val user: User = getCurrentUser(currentUser)
+        val code = generateCode().also { usedCodes.add(it) }
 
-        val quiz = Quiz(quizCreationRequest.title, user)
+        val quiz = Quiz(quizCreationRequest.title, user, code)
         val savedQuiz = quizRepository.save(quiz)
 
         quizCreationRequest.questions.forEach { questionRequest ->
@@ -45,8 +51,9 @@ class QuizService(
 
     fun createBlankQuiz(blankQuizRequest: BlankQuizRequest, currentUser: CustomUserDetails?): BlankQuizDto {
         val user: User = getCurrentUser(currentUser)
+        val code = generateCode().also { usedCodes.add(it) }
 
-        val quiz = Quiz(blankQuizRequest.title, user)
+        val quiz = Quiz(blankQuizRequest.title, user, code)
         val savedQuiz = quizRepository.save(quiz)
 
         return dtoMapper.quizToBlankDto(savedQuiz)
@@ -105,10 +112,56 @@ class QuizService(
             .toList()
     }
 
+    fun existsById(id: Long) = quizRepository.existsById(id)
+
+    fun accessWithCode(code: String, name: String): JwtAuthenticationResponse {
+        val quiz = quizRepository.findByCode(code) ?: throw QuizNotFoundException(code)
+        val username = generateUsername()
+        val password = generatePassword()
+        val user = authenticationProvider.userWithEncodedPassword(
+            username,
+            password,
+            name,
+            emptySet()
+        ).apply {
+            registered = false
+            contextQuiz = quiz
+        }
+        userRepository.save(user)
+        return authenticationProvider.authenticate(username, password)
+    }
+
     private fun getCurrentUser(currentUser: CustomUserDetails?): User {
         if (currentUser == null) {
             throw NoAuthException()
         }
         return userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
+    }
+
+    private fun generateUsername(): String {
+        var username = generateRandomString(30)
+        while (userRepository.existsByUsername(username)) {
+            username = generateRandomString(30)
+        }
+        return username
+    }
+
+    private fun generatePassword() = generateRandomString(60)
+
+    private fun generateCode(): String {
+        var code = generateCodeString()
+        while (usedCodes.contains(code)) {
+            code = generateCodeString()
+        }
+        return code
+    }
+
+    private fun generateCodeString() = generateRandomString(6).toUpperCase()
+
+    private fun generateRandomString(length: Int): String {
+        val stringGenerator = RandomStringGenerator.Builder()
+            .withinRange('0'.toInt(), 'z'.toInt())
+            .build()
+        return stringGenerator.generate(length)
     }
 }

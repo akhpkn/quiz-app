@@ -57,9 +57,14 @@ class QuizController(private val quizService: QuizService) {
         quizService.addQuestion(quizId, questionCreationRequest, currentUser)
     }
 
-    @GetMapping("/{quizId}/exists")
-    fun existsById(@PathVariable("quizId") quizId: Long): Boolean {
-        return quizService.existsById(quizId)
+    @GetMapping("/exists-by-code")
+    fun existsByCode(@RequestParam("code") code: String): Boolean {
+        return quizService.existsByCode(code)
+    }
+
+    @GetMapping("/{code}")
+    fun getByCode(@PathVariable("code") code: String): BlankQuizDto {
+        return quizService.getQuizByCode(code)
     }
 
     @PostMapping("/access")

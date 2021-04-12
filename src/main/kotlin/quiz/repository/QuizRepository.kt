@@ -15,7 +15,10 @@ interface QuizRepository : JpaRepository<Quiz, Long> {
     @Query("select q from Quiz q join fetch q.author a where a.id = ?1")
     fun findQuizzesByAuthorId(authorId: Long): List<Quiz>
 
+    @Query("select q from Quiz q join fetch q.author where q.code = ?1")
     fun findByCode(code: String): Quiz?
+
+    fun existsByCode(code: String): Boolean
 
     @Query("select q from Quiz q where q.code is null")
     fun findQuizzesWithoutCode(): MutableList<Quiz>

@@ -113,7 +113,12 @@ class QuizService(
             .toList()
     }
 
-    fun existsById(id: Long) = quizRepository.existsById(id)
+    fun existsByCode(code: String) = quizRepository.existsByCode(code)
+
+    fun getQuizByCode(code: String): BlankQuizDto {
+        val quiz = quizRepository.findByCode(code) ?: throw QuizNotFoundException(code)
+        return dtoMapper.quizToBlankDto(quiz)
+    }
 
     fun accessWithCode(code: String, name: String): JwtAuthenticationResponse {
         val quiz = quizRepository.findByCode(code) ?: throw QuizNotFoundException(code)

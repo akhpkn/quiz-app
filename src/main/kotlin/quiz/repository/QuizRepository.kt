@@ -17,6 +17,9 @@ interface QuizRepository : JpaRepository<Quiz, Long> {
 
     fun findByCode(code: String): Quiz?
 
+    @Query("select q from Quiz q where q.code is null")
+    fun findQuizzesWithoutCode(): MutableList<Quiz>
+
     @Query("select q.code from Quiz q")
     fun getCodes(): MutableList<String>
 }

@@ -1,5 +1,6 @@
 package quiz.service
 
+import org.apache.commons.text.CharacterPredicates
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.stereotype.Service
 import quiz.dto.*
@@ -131,6 +132,12 @@ class QuizService(
         return authenticationProvider.authenticate(username, password)
     }
 
+    fun generateCodesIfNull() {
+        val quizzes = quizRepository.findQuizzesWithoutCode()
+        quizzes.forEach { it.code = generateCode() }
+        quizRepository.saveAll(quizzes)
+    }
+
     private fun getCurrentUser(currentUser: CustomUserDetails?): User {
         if (currentUser == null) {
             throw NoAuthException()
@@ -161,6 +168,7 @@ class QuizService(
     private fun generateRandomString(length: Int): String {
         val stringGenerator = RandomStringGenerator.Builder()
             .withinRange('0'.toInt(), 'z'.toInt())
+            .filteredBy(CharacterPredicates.DIGITS, CharacterPredicates.LETTERS)
             .build()
         return stringGenerator.generate(length)
     }

@@ -69,4 +69,9 @@ class QuizController(private val quizService: QuizService) {
     ): JwtAuthenticationResponse {
         return quizService.accessWithCode(code, name)
     }
+
+    @PostMapping("/generate-codes")
+    fun generateCodes() {
+        quizService.generateCodesIfNull()
+    }
 }

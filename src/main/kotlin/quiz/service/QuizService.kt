@@ -92,7 +92,7 @@ class QuizService(
                     QuestionDto(question.id, question.text, question.multiple, answerDtoList)
                 }
                 val author = dtoMapper.userToDto(quiz.author)
-                QuizDto(quiz.id, quiz.title, author, questionDtoList)
+                QuizDto(quiz.id, quiz.title, quiz.title, author, questionDtoList)
             }
             .toList()
     }

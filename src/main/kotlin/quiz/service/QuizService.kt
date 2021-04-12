@@ -91,7 +91,7 @@ class QuizService(
                         answersByQuestionMap[question]?.map { AnswerDto(it.id, it.text, it.correct) } ?: ArrayList()
                     QuestionDto(question.id, question.text, question.multiple, answerDtoList)
                 }
-                val author = UserDto(quiz.author.id, quiz.author.username)
+                val author = dtoMapper.userToDto(quiz.author)
                 QuizDto(quiz.id, quiz.title, author, questionDtoList)
             }
             .toList()

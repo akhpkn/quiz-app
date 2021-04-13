@@ -25,6 +25,7 @@ interface DtoMapper {
 
     fun answersToDtos(results: List<Answer>): List<AnswerDto>
 
+    @Mappings(Mapping(target = "questionId", source = "question.id"))
     fun questionToDto(question: Question, answers: List<Answer>): QuestionDto {
         return QuestionDto(
             question.id,

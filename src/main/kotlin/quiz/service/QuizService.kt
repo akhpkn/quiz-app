@@ -105,12 +105,14 @@ class QuizService(
         return quizRepository.findQuizzesByAuthorId(authorId).map { dtoMapper.quizToBlankDto(it) }
     }
 
-    fun getQuizQuestions(quizId: Long): List<QuestionDto> {
+    fun getQuizQuestions(quizId: Long): QuestionDtoList {
         val answers: List<Answer> = answerRepository.findAnswersByQuizId(quizId)
-        return answers
-            .groupBy { it.question }
-            .map { (question, answerList) -> dtoMapper.questionToDto(question, answerList) }
-            .toList()
+        return QuestionDtoList(
+            answers
+                .groupBy { it.question }
+                .map { (question, answerList) -> dtoMapper.questionToDto(question, answerList) }
+                .toList()
+        )
     }
 
     fun existsByCode(code: String) = quizRepository.existsByCode(code)
@@ -136,6 +138,14 @@ class QuizService(
         userRepository.save(user)
         return authenticationProvider.authenticate(username, password)
     }
+
+//    fun sendAnswers(selectedAnswersList: List<SelectedAnswers>, currentUser: CustomUserDetails?) {
+//        val user = getCurrentUser(currentUser)
+//
+//        selectedAnswersList.forEach { selectedAnswers ->
+//
+//        }
+//    }
 
     fun generateCodesIfNull() {
         val quizzes = quizRepository.findQuizzesWithoutCode()

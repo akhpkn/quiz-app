@@ -20,7 +20,7 @@ class QuestionService(
     private val answerRepository: AnswerRepository,
 ) {
 
-    fun chooseAnswers(questionId: Long, answersIds: Set<Long>, currentUser: CustomUserDetails) {
+    fun chooseAnswers(questionId: Long, answersIds: Set<Long>, currentUser: CustomUserDetails?) {
         val user = getCurrentUser(currentUser)
         val question = questionRepository.findQuestionById(questionId) ?: throw QuestionNotFoundException(questionId)
         val quiz = question.quiz

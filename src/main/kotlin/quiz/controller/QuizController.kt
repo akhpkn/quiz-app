@@ -14,7 +14,7 @@ class QuizController(private val quizService: QuizService) {
     fun createQuiz(
         @RequestBody quizCreationRequest: QuizCreationRequest,
         @CurrentUser currentUser: CustomUserDetails,
-    ): String {
+    ): BlankQuizDto {
         return quizService.createQuiz(quizCreationRequest, currentUser)
     }
 

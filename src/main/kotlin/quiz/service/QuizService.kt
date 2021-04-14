@@ -24,7 +24,7 @@ class QuizService(
 
     private val usedCodes = quizRepository.getCodes()
 
-    fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): String {
+    fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): BlankQuizDto {
         val user: User = getCurrentUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
@@ -41,7 +41,7 @@ class QuizService(
             }
         }
 
-        return savedQuiz.code
+        return dtoMapper.quizToBlankDto(savedQuiz)
     }
 
     fun createBlankQuiz(blankQuizRequest: BlankQuizRequest, currentUser: CustomUserDetails?): BlankQuizDto {

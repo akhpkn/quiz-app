@@ -14,8 +14,8 @@ class QuizController(private val quizService: QuizService) {
     fun createQuiz(
         @RequestBody quizCreationRequest: QuizCreationRequest,
         @CurrentUser currentUser: CustomUserDetails,
-    ) {
-        quizService.createQuiz(quizCreationRequest, currentUser)
+    ): String {
+        return quizService.createQuiz(quizCreationRequest, currentUser)
     }
 
     @PostMapping("/create-blank")
@@ -73,6 +73,15 @@ class QuizController(private val quizService: QuizService) {
         @RequestParam("name") name: String,
     ): JwtAuthenticationResponse {
         return quizService.accessWithCode(code, name)
+    }
+
+    @PostMapping("/{quizId}/send-answers")
+    fun sendAnswers(
+        @PathVariable("quizId") quizId: Long,
+        @RequestBody selectedAnswers: SelectedAnswers,
+        @CurrentUser currentUser: CustomUserDetails,
+    ): ResultDto {
+        return quizService.sendAnswers(quizId, selectedAnswers, currentUser)
     }
 
     @PostMapping("/generate-codes")

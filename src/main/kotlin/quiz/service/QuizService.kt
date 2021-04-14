@@ -4,19 +4,10 @@ import org.apache.commons.text.CharacterPredicates
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.stereotype.Service
 import quiz.dto.*
-import quiz.exception.NoAuthException
-import quiz.exception.QuizNotFoundException
-import quiz.exception.QuizWriteAccessNotAllowedException
-import quiz.exception.UserNotFoundException
+import quiz.exception.*
 import quiz.mapper.DtoMapper
-import quiz.model.Answer
-import quiz.model.Question
-import quiz.model.Quiz
-import quiz.model.User
-import quiz.repository.AnswerRepository
-import quiz.repository.QuestionRepository
-import quiz.repository.QuizRepository
-import quiz.repository.UserRepository
+import quiz.model.*
+import quiz.repository.*
 import quiz.security.AuthenticationProvider
 import quiz.security.CustomUserDetails
 
@@ -27,12 +18,13 @@ class QuizService(
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
     private val authenticationProvider: AuthenticationProvider,
+    private val resultRepository: ResultRepository,
     private val dtoMapper: DtoMapper,
 ) {
 
     private val usedCodes = quizRepository.getCodes()
 
-    fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?) {
+    fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): String {
         val user: User = getCurrentUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
@@ -48,6 +40,8 @@ class QuizService(
                 answerRepository.save(answer)
             }
         }
+
+        return savedQuiz.code
     }
 
     fun createBlankQuiz(blankQuizRequest: BlankQuizRequest, currentUser: CustomUserDetails?): BlankQuizDto {
@@ -139,18 +133,46 @@ class QuizService(
         return authenticationProvider.authenticate(username, password)
     }
 
-//    fun sendAnswers(selectedAnswersList: List<SelectedAnswers>, currentUser: CustomUserDetails?) {
-//        val user = getCurrentUser(currentUser)
-//
-//        selectedAnswersList.forEach { selectedAnswers ->
-//
-//        }
-//    }
+    fun sendAnswers(quizId: Long, selectedAnswers: SelectedAnswers, currentUser: CustomUserDetails?): ResultDto {
+        val user = getCurrentUser(currentUser)
+        val answers = answerRepository.findByIdIn(selectedAnswers.answersIds)
+        val quiz = validateSelectedAnswersAndGetQuiz(quizId, answers)
+        var totalCorrectAnswers = 0
+
+        answers.groupBy { it.question }.forEach { (_, answerList) ->
+            val diff = answerList.count { it.correct } - answerList.count { !it.correct }
+            val correctAnswers = if (diff > 0) diff else 0
+            totalCorrectAnswers += correctAnswers
+        }
+
+        val quizAnswers = answerRepository.findAnswersByQuizId(quizId)
+
+        val result = resultRepository.findResultByQuizIdAndUserId(quizId, user.id) ?: Result(user, quiz)
+        result.correctAnswers = totalCorrectAnswers
+        result.score = 1.0 * result.correctAnswers / quizAnswers.count { it.correct }
+
+        val savedResult = resultRepository.save(result)
+        return dtoMapper.resultToDto(savedResult)
+    }
 
     fun generateCodesIfNull() {
         val quizzes = quizRepository.findQuizzesWithoutCode()
         quizzes.forEach { it.code = generateCode() }
         quizRepository.saveAll(quizzes)
+    }
+
+    private fun validateSelectedAnswersAndGetQuiz(quizId: Long, answers: List<Answer>): Quiz {
+        val quiz = quizRepository.findQuizById(quizId) ?: throw QuizNotFoundException(quizId)
+        val quizIds = answers.map { it.question.quiz.id }.toSet()
+
+        if (quizIds.size > 1) {
+            throw WrongSelectedAnswersDefinitionException(quizId)
+        }
+        if (quizIds.size == 1 && quizIds.first() != quizId) {
+            throw WrongSelectedAnswersDefinitionException(quizId)
+        }
+
+        return quiz
     }
 
     private fun getCurrentUser(currentUser: CustomUserDetails?): User {

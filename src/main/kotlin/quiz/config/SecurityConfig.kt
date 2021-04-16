@@ -82,6 +82,8 @@ open class SecurityConfig(
             ?.permitAll()
             ?.antMatchers(HttpMethod.GET, "/api/quiz/**")
             ?.permitAll()
+            ?.antMatchers(HttpMethod.POST, "/api/quiz/access")
+            ?.permitAll()
             ?.anyRequest()
             ?.authenticated()
 

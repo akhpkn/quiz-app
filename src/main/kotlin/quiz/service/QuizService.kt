@@ -145,9 +145,12 @@ class QuizService(
             totalCorrectAnswers += correctAnswers
         }
 
-        val quizAnswers = answerRepository.findAnswersByQuizId(quizId)
+        if (resultRepository.findResultByQuizIdAndUserId(quizId, user.id) != null) {
+            throw ResultAlreadyExistsException(user.id, quizId)
+        }
+        val result = Result(user, quiz)
 
-        val result = resultRepository.findResultByQuizIdAndUserId(quizId, user.id) ?: Result(user, quiz)
+        val quizAnswers = answerRepository.findAnswersByQuizId(quizId)
         result.correctAnswers = totalCorrectAnswers
         result.score = 1.0 * result.correctAnswers / quizAnswers.count { it.correct }
 

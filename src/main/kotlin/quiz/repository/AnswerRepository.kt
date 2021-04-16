@@ -16,5 +16,6 @@ interface AnswerRepository : JpaRepository<Answer, Long> {
     @Query("select a from Answer a join fetch a.question q where q.id = ?1")
     fun findAnswersByQuestionId(questionId: Long): List<Answer>
 
+    @Query("select a from Answer a join fetch a.question q join fetch q.quiz where a.id in ?1")
     fun findByIdIn(ids: Set<Long>): List<Answer>
 }

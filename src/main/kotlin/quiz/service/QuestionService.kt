@@ -1,6 +1,7 @@
 package quiz.service
 
 import org.springframework.stereotype.Service
+import quiz.dto.SelectedAnswers
 import quiz.exception.NoAuthException
 import quiz.exception.QuestionNotFoundException
 import quiz.exception.UserNotFoundException
@@ -20,11 +21,11 @@ class QuestionService(
     private val answerRepository: AnswerRepository,
 ) {
 
-    fun chooseAnswers(questionId: Long, answersIds: Set<Long>, currentUser: CustomUserDetails?) {
+    fun chooseAnswers(questionId: Long, selectedAnswers: SelectedAnswers, currentUser: CustomUserDetails?) {
         val user = getCurrentUser(currentUser)
         val question = questionRepository.findQuestionById(questionId) ?: throw QuestionNotFoundException(questionId)
         val quiz = question.quiz
-        val answers = answerRepository.findByIdIn(answersIds)
+        val answers = answerRepository.findByIdIn(selectedAnswers.answersIds)
 
         val diff = answers.count { it.correct } - answers.count { !it.correct }
         val correctAnswers = if (diff > 0) diff else 0

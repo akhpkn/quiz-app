@@ -116,14 +116,15 @@ class QuizService(
         return dtoMapper.quizToBlankDto(quiz)
     }
 
-    fun accessWithCode(code: String, name: String): JwtAuthenticationResponse {
+    fun accessWithCode(quizAccessRequest: QuizAccessRequest): JwtAuthenticationResponse {
+        val code = quizAccessRequest.code
         val quiz = quizRepository.findByCode(code) ?: throw QuizNotFoundException(code)
         val username = generateUsername()
         val password = generatePassword()
         val user = authenticationProvider.userWithEncodedPassword(
             username,
             password,
-            name,
+            quizAccessRequest.name,
             emptySet()
         ).apply {
             registered = false

@@ -68,11 +68,8 @@ class QuizController(private val quizService: QuizService) {
     }
 
     @PostMapping("/access")
-    fun accessWithCode(
-        @RequestParam("code") code: String,
-        @RequestParam("name") name: String,
-    ): JwtAuthenticationResponse {
-        return quizService.accessWithCode(code, name)
+    fun accessWithCode(@RequestBody quizAccessRequest: QuizAccessRequest): JwtAuthenticationResponse {
+        return quizService.accessWithCode(quizAccessRequest)
     }
 
     @PostMapping("/{quizId}/send-answers")

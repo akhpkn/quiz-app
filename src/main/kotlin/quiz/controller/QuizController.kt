@@ -27,22 +27,22 @@ class QuizController(private val quizService: QuizService) {
     }
 
     @GetMapping("/all")
-    fun getQuizzes(): List<QuizDto> {
+    fun getQuizzes(): ListWrapper<QuizDto> {
         return quizService.getQuizzes()
     }
 
     @GetMapping("/all-blank")
-    fun getBlankQuizzes(): List<BlankQuizDto> {
+    fun getBlankQuizzes(): ListWrapper<BlankQuizDto> {
         return quizService.getBlankQuizzes()
     }
 
     @GetMapping("/created-by-me")
-    fun getQuizzesCreatedByMe(@CurrentUser currentUser: CustomUserDetails?): List<BlankQuizDto> {
+    fun getQuizzesCreatedByMe(@CurrentUser currentUser: CustomUserDetails?): ListWrapper<BlankQuizDto> {
         return quizService.getQuizzesCreatedByMe(currentUser)
     }
 
     @GetMapping
-    fun getBlankQuizzesByAuthor(@RequestParam("authorId") authorId: Long): List<BlankQuizDto> {
+    fun getBlankQuizzesByAuthor(@RequestParam("authorId") authorId: Long): ListWrapper<BlankQuizDto> {
         return quizService.getBlankQuizzesByAuthor(authorId)
     }
 

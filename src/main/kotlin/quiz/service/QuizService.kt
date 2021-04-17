@@ -72,36 +72,37 @@ class QuizService(
         }
     }
 
-    fun getQuizzes(): List<QuizDto> {
+    fun getQuizzes(): ListWrapper<QuizDto> {
         val answers: List<Answer> = answerRepository.findAllAnswers()
         val answersByQuestionMap: Map<Question, List<Answer>> = answers.groupBy { it.question }
 
-        return answersByQuestionMap
-            .keys
-            .groupBy { it.quiz }
-            .map { (quiz, questions) ->
-                val questionDtoList = questions.map { question ->
-                    val answerDtoList: List<AnswerDto> =
-                        answersByQuestionMap[question]?.map { AnswerDto(it.id, it.text, it.correct) } ?: ArrayList()
-                    QuestionDto(question.id, question.text, question.multiple, answerDtoList)
+        return ListWrapper(
+            answersByQuestionMap
+                .keys
+                .groupBy { it.quiz }
+                .map { (quiz, questions) ->
+                    val questionDtoList = questions.map { question ->
+                        val answerDtoList: List<AnswerDto> =
+                            answersByQuestionMap[question]?.map { AnswerDto(it.id, it.text, it.correct) } ?: ArrayList()
+                        QuestionDto(question.id, question.text, question.multiple, answerDtoList)
+                    }
+                    val author = dtoMapper.userToDto(quiz.author)
+                    QuizDto(quiz.id, quiz.title, quiz.title, author, questionDtoList)
                 }
-                val author = dtoMapper.userToDto(quiz.author)
-                QuizDto(quiz.id, quiz.title, quiz.title, author, questionDtoList)
-            }
-            .toList()
+                .toList()
+        )
     }
 
-    fun getBlankQuizzes(): List<BlankQuizDto> {
-        return quizRepository.findAllQuizzes().map { dtoMapper.quizToBlankDto(it) }
-    }
+    fun getBlankQuizzes() = ListWrapper(quizRepository.findAllQuizzes().map { dtoMapper.quizToBlankDto(it) })
 
-    fun getBlankQuizzesByAuthor(authorId: Long): List<BlankQuizDto> {
-        return quizRepository.findQuizzesByAuthorId(authorId).map { dtoMapper.quizToBlankDto(it) }
-    }
 
-    fun getQuizzesCreatedByMe(currentUser: CustomUserDetails?): List<BlankQuizDto> {
+    fun getBlankQuizzesByAuthor(authorId: Long) =
+        ListWrapper(quizRepository.findQuizzesByAuthorId(authorId).map { dtoMapper.quizToBlankDto(it) })
+
+
+    fun getQuizzesCreatedByMe(currentUser: CustomUserDetails?): ListWrapper<BlankQuizDto> {
         val user = getCurrentUser(currentUser)
-        return quizRepository.findQuizzesByAuthorId(user.id).map { dtoMapper.quizToBlankDto(it) }
+        return ListWrapper(quizRepository.findQuizzesByAuthorId(user.id).map { dtoMapper.quizToBlankDto(it) })
     }
 
     fun getQuizQuestions(quizId: Long): ListWrapper<QuestionDto> {

@@ -2,15 +2,13 @@ package quiz.service
 
 import org.springframework.stereotype.Service
 import quiz.dto.SelectedAnswers
-import quiz.exception.NoAuthException
 import quiz.exception.QuestionNotFoundException
-import quiz.exception.UserNotFoundException
 import quiz.model.Result
-import quiz.model.User
 import quiz.repository.AnswerRepository
 import quiz.repository.QuestionRepository
 import quiz.repository.ResultRepository
 import quiz.repository.UserRepository
+import quiz.security.AuthManager
 import quiz.security.CustomUserDetails
 
 @Service
@@ -19,10 +17,11 @@ class QuestionService(
     private val userRepository: UserRepository,
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
+    private val authManager: AuthManager,
 ) {
 
     fun chooseAnswers(questionId: Long, selectedAnswers: SelectedAnswers, currentUser: CustomUserDetails?) {
-        val user = getCurrentUser(currentUser)
+        val user = authManager.getAuthorizedUser(currentUser)
         val question = questionRepository.findQuestionById(questionId) ?: throw QuestionNotFoundException(questionId)
         val quiz = question.quiz
         val answers = answerRepository.findByIdIn(selectedAnswers.answersIds)
@@ -37,12 +36,5 @@ class QuestionService(
         result.correctAnswers += correctAnswers
         result.score = 1.0 * result.correctAnswers / quizAnswers.count { it.correct }
         resultRepository.save(result)
-    }
-
-    private fun getCurrentUser(currentUser: CustomUserDetails?): User {
-        if (currentUser == null) {
-            throw NoAuthException()
-        }
-        return userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
     }
 }

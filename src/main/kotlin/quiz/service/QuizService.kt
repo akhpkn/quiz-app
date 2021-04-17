@@ -4,11 +4,14 @@ import org.apache.commons.text.CharacterPredicates
 import org.apache.commons.text.RandomStringGenerator
 import org.springframework.stereotype.Service
 import quiz.dto.*
-import quiz.exception.*
+import quiz.exception.QuizNotFoundException
+import quiz.exception.QuizWriteAccessNotAllowedException
+import quiz.exception.ResultAlreadyExistsException
+import quiz.exception.WrongSelectedAnswersDefinitionException
 import quiz.mapper.DtoMapper
 import quiz.model.*
 import quiz.repository.*
-import quiz.security.AuthenticationProvider
+import quiz.security.AuthManager
 import quiz.security.CustomUserDetails
 
 @Service
@@ -17,7 +20,7 @@ class QuizService(
     private val quizRepository: QuizRepository,
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
-    private val authenticationProvider: AuthenticationProvider,
+    private val authManager: AuthManager,
     private val resultRepository: ResultRepository,
     private val dtoMapper: DtoMapper,
 ) {
@@ -25,7 +28,7 @@ class QuizService(
     private val usedCodes = quizRepository.getCodes()
 
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): BlankQuizDto {
-        val user: User = getCurrentUser(currentUser)
+        val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
         val quiz = Quiz(quizCreationRequest.title, user, code)
@@ -45,7 +48,7 @@ class QuizService(
     }
 
     fun createBlankQuiz(blankQuizRequest: BlankQuizRequest, currentUser: CustomUserDetails?): BlankQuizDto {
-        val user: User = getCurrentUser(currentUser)
+        val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
         val quiz = Quiz(blankQuizRequest.title, user, code)
@@ -55,7 +58,7 @@ class QuizService(
     }
 
     fun addQuestion(quizId: Long, questionCreationRequest: QuestionCreationRequest, currentUser: CustomUserDetails?) {
-        val user: User = getCurrentUser(currentUser)
+        val user: User = authManager.getAuthorizedUser(currentUser)
 
         val quiz = quizRepository.findQuizById(quizId) ?: throw QuizNotFoundException(quizId)
 
@@ -101,7 +104,7 @@ class QuizService(
 
 
     fun getQuizzesCreatedByMe(currentUser: CustomUserDetails?): ListWrapper<BlankQuizDto> {
-        val user = getCurrentUser(currentUser)
+        val user = authManager.getAuthorizedUser(currentUser)
         return ListWrapper(quizRepository.findQuizzesByAuthorId(user.id).map { dtoMapper.quizToBlankDto(it) })
     }
 
@@ -127,7 +130,7 @@ class QuizService(
         val quiz = quizRepository.findByCode(code) ?: throw QuizNotFoundException(code)
         val username = generateUsername()
         val password = generatePassword()
-        val user = authenticationProvider.userWithEncodedPassword(
+        val user = authManager.userWithEncodedPassword(
             username,
             password,
             quizAccessRequest.name,
@@ -137,11 +140,11 @@ class QuizService(
             contextQuiz = quiz
         }
         userRepository.save(user)
-        return authenticationProvider.authenticate(username, password)
+        return authManager.authenticate(username, password)
     }
 
     fun sendAnswers(quizId: Long, selectedAnswers: SelectedAnswers, currentUser: CustomUserDetails?): ResultDto {
-        val user = getCurrentUser(currentUser)
+        val user = authManager.getAuthorizedUser(currentUser)
         val answers = answerRepository.findByIdIn(selectedAnswers.answersIds)
         val quiz = validateSelectedAnswersAndGetQuiz(quizId, answers)
         var totalCorrectAnswers = 0
@@ -183,13 +186,6 @@ class QuizService(
         }
 
         return quiz
-    }
-
-    private fun getCurrentUser(currentUser: CustomUserDetails?): User {
-        if (currentUser == null) {
-            throw NoAuthException()
-        }
-        return userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
     }
 
     private fun generateUsername(): String {

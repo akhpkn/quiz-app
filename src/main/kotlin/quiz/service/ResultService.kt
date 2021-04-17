@@ -4,14 +4,12 @@ import org.springframework.stereotype.Service
 import quiz.dto.ListWrapper
 import quiz.dto.QuizResultsDto
 import quiz.dto.ResultDto
-import quiz.exception.NoAuthException
 import quiz.exception.ResultNotFoundException
-import quiz.exception.UserNotFoundException
 import quiz.mapper.DtoMapper
-import quiz.model.User
 import quiz.repository.QuestionRepository
 import quiz.repository.ResultRepository
 import quiz.repository.UserRepository
+import quiz.security.AuthManager
 import quiz.security.CustomUserDetails
 
 @Service
@@ -19,6 +17,7 @@ class ResultService(
     private val resultRepository: ResultRepository,
     private val userRepository: UserRepository,
     private val questionRepository: QuestionRepository,
+    private val authManager: AuthManager,
     private val dtoMapper: DtoMapper,
 ) {
 
@@ -32,7 +31,7 @@ class ResultService(
     }
 
     fun getResultsForQuizzesCreatedByMe(currentUser: CustomUserDetails?): ListWrapper<QuizResultsDto> {
-        val user = getCurrentUser(currentUser)
+        val user = authManager.getAuthorizedUser(currentUser)
         val results = resultRepository.findResultsForQuizzesCreatedByUser(user)
 
         return ListWrapper(
@@ -43,12 +42,5 @@ class ResultService(
                     dtoMapper.quizToQuizResultsDto(quiz, questionsNumber, results)
                 }
         )
-    }
-
-    private fun getCurrentUser(currentUser: CustomUserDetails?): User {
-        if (currentUser == null) {
-            throw NoAuthException()
-        }
-        return userRepository.findUserById(currentUser.userId) ?: throw UserNotFoundException(currentUser.userId)
     }
 }

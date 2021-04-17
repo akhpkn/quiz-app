@@ -10,14 +10,14 @@ import quiz.mapper.DtoMapper
 import quiz.model.Role
 import quiz.repository.RoleRepository
 import quiz.repository.UserRepository
-import quiz.security.AuthenticationProvider
+import quiz.security.AuthManager
 import java.util.*
 
 @Service
 class AuthService(
     private val userRepository: UserRepository,
     private val roleRepository: RoleRepository,
-    private val authenticationProvider: AuthenticationProvider,
+    private val authManager: AuthManager,
     private val dtoMapper: DtoMapper,
 ) {
 
@@ -39,7 +39,7 @@ class AuthService(
             userRole = roleRepository.save(roleUser)
         }
 
-        val user = authenticationProvider.userWithEncodedPassword(
+        val user = authManager.userWithEncodedPassword(
             signUpRequest.username,
             signUpRequest.password,
             signUpRequest.name,
@@ -51,5 +51,5 @@ class AuthService(
     }
 
     fun signIn(signInRequest: SignInRequest) =
-        authenticationProvider.authenticate(signInRequest.username, signInRequest.password)
+        authManager.authenticate(signInRequest.username, signInRequest.password)
 }

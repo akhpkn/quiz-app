@@ -41,11 +41,11 @@ interface DtoMapper {
     }
 
     @Mappings(Mapping(target = "quizId", source = "quiz.id"))
-    fun quizToQuizResultsDto(quiz: Quiz, questionsNumber: Int, results: List<Result>): QuizResultsDto {
+    fun quizToQuizResultsDto(quiz: Quiz, results: List<Result>): QuizResultsDto {
         return QuizResultsDto(
             quiz.id,
             quiz.title,
-            questionsNumber,
+            quiz.questionsNumber,
             resultsToSmallDtos(results)
         )
     }

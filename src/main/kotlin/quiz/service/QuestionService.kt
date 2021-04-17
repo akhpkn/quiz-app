@@ -7,14 +7,12 @@ import quiz.model.Result
 import quiz.repository.AnswerRepository
 import quiz.repository.QuestionRepository
 import quiz.repository.ResultRepository
-import quiz.repository.UserRepository
 import quiz.security.AuthManager
 import quiz.security.CustomUserDetails
 
 @Service
 class QuestionService(
     private val resultRepository: ResultRepository,
-    private val userRepository: UserRepository,
     private val questionRepository: QuestionRepository,
     private val answerRepository: AnswerRepository,
     private val authManager: AuthManager,

@@ -171,21 +171,6 @@ class QuizService(
         return dtoMapper.resultToDto(savedResult)
     }
 
-    fun generateCodesIfNull() {
-        val quizzes = quizRepository.findQuizzesWithoutCode()
-        quizzes.forEach { it.code = generateCode() }
-        quizRepository.saveAll(quizzes)
-    }
-
-    fun initQuestionsNumberForQuizzes() {
-        val quizzes = quizRepository.findAllQuizzes()
-        quizzes.forEach { quiz ->
-            val questionsNumber = questionRepository.getQuestionsNumberForQuiz(quiz)
-            quiz.questionsNumber = questionsNumber
-        }
-        quizRepository.saveAll(quizzes)
-    }
-
     private fun validateSelectedAnswersAndGetQuiz(quizId: Long, answers: List<Answer>): Quiz {
         val quiz = quizRepository.findQuizById(quizId) ?: throw QuizNotFoundException(quizId)
         val quizIds = answers.map { it.question.quiz.id }.toSet()

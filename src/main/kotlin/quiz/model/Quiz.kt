@@ -13,7 +13,6 @@ class Quiz(
 
     var code: String,
 
-    @Column(name = "questions_number")
     var questionsNumber: Int,
 ) {
     @Id

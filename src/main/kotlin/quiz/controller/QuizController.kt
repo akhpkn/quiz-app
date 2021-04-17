@@ -85,14 +85,4 @@ class QuizController(private val quizService: QuizService) {
     ): ResultDto {
         return quizService.sendAnswers(quizId, selectedAnswers, currentUser)
     }
-
-    @PutMapping("/generate-codes")
-    fun generateCodes() {
-        quizService.generateCodesIfNull()
-    }
-
-    @PutMapping("/init-question-numbers")
-    fun initQuestionNumbers() {
-        quizService.initQuestionsNumberForQuizzes()
-    }
 }

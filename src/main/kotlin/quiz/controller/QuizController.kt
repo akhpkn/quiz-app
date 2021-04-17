@@ -13,7 +13,7 @@ class QuizController(private val quizService: QuizService) {
     @PostMapping("/create")
     fun createQuiz(
         @RequestBody quizCreationRequest: QuizCreationRequest,
-        @CurrentUser currentUser: CustomUserDetails,
+        @CurrentUser currentUser: CustomUserDetails?,
     ): BlankQuizDto {
         return quizService.createQuiz(quizCreationRequest, currentUser)
     }
@@ -21,7 +21,7 @@ class QuizController(private val quizService: QuizService) {
     @PostMapping("/create-blank")
     fun createBlankQuiz(
         @RequestBody blankQuizRequest: BlankQuizRequest,
-        @CurrentUser currentUser: CustomUserDetails,
+        @CurrentUser currentUser: CustomUserDetails?,
     ): BlankQuizDto {
         return quizService.createBlankQuiz(blankQuizRequest, currentUser)
     }
@@ -34,6 +34,11 @@ class QuizController(private val quizService: QuizService) {
     @GetMapping("/all-blank")
     fun getBlankQuizzes(): List<BlankQuizDto> {
         return quizService.getBlankQuizzes()
+    }
+
+    @GetMapping("/created-by-me")
+    fun getQuizzesCreatedByMe(@CurrentUser currentUser: CustomUserDetails?): List<BlankQuizDto> {
+        return quizService.getQuizzesCreatedByMe(currentUser)
     }
 
     @GetMapping
@@ -52,7 +57,7 @@ class QuizController(private val quizService: QuizService) {
     fun addQuestionToQuiz(
         @PathVariable("quizId") quizId: Long,
         @RequestBody questionCreationRequest: QuestionCreationRequest,
-        @CurrentUser currentUser: CustomUserDetails,
+        @CurrentUser currentUser: CustomUserDetails?,
     ) {
         quizService.addQuestion(quizId, questionCreationRequest, currentUser)
     }
@@ -76,7 +81,7 @@ class QuizController(private val quizService: QuizService) {
     fun sendAnswers(
         @PathVariable("quizId") quizId: Long,
         @RequestBody selectedAnswers: SelectedAnswers,
-        @CurrentUser currentUser: CustomUserDetails,
+        @CurrentUser currentUser: CustomUserDetails?,
     ): ResultDto {
         return quizService.sendAnswers(quizId, selectedAnswers, currentUser)
     }

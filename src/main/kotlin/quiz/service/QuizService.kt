@@ -99,6 +99,11 @@ class QuizService(
         return quizRepository.findQuizzesByAuthorId(authorId).map { dtoMapper.quizToBlankDto(it) }
     }
 
+    fun getQuizzesCreatedByMe(currentUser: CustomUserDetails?): List<BlankQuizDto> {
+        val user = getCurrentUser(currentUser)
+        return quizRepository.findQuizzesByAuthorId(user.id).map { dtoMapper.quizToBlankDto(it) }
+    }
+
     fun getQuizQuestions(quizId: Long): QuestionDtoList {
         val answers: List<Answer> = answerRepository.findAnswersByQuizId(quizId)
         return QuestionDtoList(

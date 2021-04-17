@@ -12,7 +12,7 @@ interface QuizRepository : JpaRepository<Quiz, Long> {
     @Query("select q from Quiz q join fetch q.author")
     fun findAllQuizzes(): List<Quiz>
 
-    @Query("select q from Quiz q join fetch q.author a where a.id = ?1")
+    @Query("select q from Quiz q join fetch q.author a where a.id = ?1 order by q.id desc")
     fun findQuizzesByAuthorId(authorId: Long): List<Quiz>
 
     @Query("select q from Quiz q join fetch q.author where q.code = ?1")

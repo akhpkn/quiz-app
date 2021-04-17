@@ -14,7 +14,7 @@ class QuestionController(private val questionService: QuestionService) {
     fun chooseAnswers(
         @PathVariable("questionId") questionId: Long,
         @RequestBody selectedAnswers: SelectedAnswers,
-        @CurrentUser currentUser: CustomUserDetails,
+        @CurrentUser currentUser: CustomUserDetails?,
     ) {
         questionService.chooseAnswers(questionId, selectedAnswers, currentUser)
     }

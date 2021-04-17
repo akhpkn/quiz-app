@@ -12,6 +12,9 @@ class Quiz(
     var author: User,
 
     var code: String,
+
+    @Column(name = "questions_number")
+    var questionsNumber: Int,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

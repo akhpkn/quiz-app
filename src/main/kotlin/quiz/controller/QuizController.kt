@@ -86,8 +86,13 @@ class QuizController(private val quizService: QuizService) {
         return quizService.sendAnswers(quizId, selectedAnswers, currentUser)
     }
 
-    @PostMapping("/generate-codes")
+    @PutMapping("/generate-codes")
     fun generateCodes() {
         quizService.generateCodesIfNull()
+    }
+
+    @PutMapping("/init-question-numbers")
+    fun initQuestionNumbers() {
+        quizService.initQuestionsNumberForQuizzes()
     }
 }

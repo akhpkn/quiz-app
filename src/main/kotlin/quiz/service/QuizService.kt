@@ -30,11 +30,12 @@ class QuizService(
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): BlankQuizDto {
         val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
+        val questionRequests = quizCreationRequest.questions
 
-        val quiz = Quiz(quizCreationRequest.title, user, code)
+        val quiz = Quiz(quizCreationRequest.title, user, code, questionRequests.size)
         val savedQuiz = quizRepository.save(quiz)
 
-        quizCreationRequest.questions.forEach { questionRequest ->
+        questionRequests.forEach { questionRequest ->
             val question = Question(questionRequest.text, questionRequest.multiple, savedQuiz)
             val savedQuestion = questionRepository.save(question)
 
@@ -51,7 +52,7 @@ class QuizService(
         val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
-        val quiz = Quiz(blankQuizRequest.title, user, code)
+        val quiz = Quiz(blankQuizRequest.title, user, code, 0)
         val savedQuiz = quizRepository.save(quiz)
 
         return dtoMapper.quizToBlankDto(savedQuiz)
@@ -65,8 +66,10 @@ class QuizService(
         if (quiz.author != user) {
             throw QuizWriteAccessNotAllowedException(user.username, quizId)
         }
+        quiz.questionsNumber++
+        val savedQuiz = quizRepository.save(quiz)
 
-        val question = Question(questionCreationRequest.text, questionCreationRequest.multiple, quiz)
+        val question = Question(questionCreationRequest.text, questionCreationRequest.multiple, savedQuiz)
         val savedQuestion = questionRepository.save(question)
 
         questionCreationRequest.answers.forEach { answerRequest ->
@@ -171,6 +174,15 @@ class QuizService(
     fun generateCodesIfNull() {
         val quizzes = quizRepository.findQuizzesWithoutCode()
         quizzes.forEach { it.code = generateCode() }
+        quizRepository.saveAll(quizzes)
+    }
+
+    fun initQuestionsNumberForQuizzes() {
+        val quizzes = quizRepository.findAllQuizzes()
+        quizzes.forEach { quiz ->
+            val questionsNumber = questionRepository.getQuestionsNumberForQuiz(quiz)
+            quiz.questionsNumber = questionsNumber
+        }
         quizRepository.saveAll(quizzes)
     }
 

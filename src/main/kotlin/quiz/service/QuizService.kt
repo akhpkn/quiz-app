@@ -104,9 +104,9 @@ class QuizService(
         return quizRepository.findQuizzesByAuthorId(user.id).map { dtoMapper.quizToBlankDto(it) }
     }
 
-    fun getQuizQuestions(quizId: Long): QuestionDtoList {
+    fun getQuizQuestions(quizId: Long): ListWrapper<QuestionDto> {
         val answers: List<Answer> = answerRepository.findAnswersByQuizId(quizId)
-        return QuestionDtoList(
+        return ListWrapper(
             answers
                 .groupBy { it.question }
                 .map { (question, answerList) -> dtoMapper.questionToDto(question, answerList) }

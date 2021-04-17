@@ -4,7 +4,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import quiz.dto.ListWrapper
+import quiz.dto.QuizResultsDto
 import quiz.dto.ResultDto
+import quiz.security.CurrentUser
+import quiz.security.CustomUserDetails
 import quiz.service.ResultService
 
 @RestController
@@ -17,5 +21,10 @@ class ResultController(private val resultService: ResultService) {
         @RequestParam("quizId") quizId: Long,
     ): ResultDto {
         return resultService.getResultByUserAndQuizIds(userId, quizId)
+    }
+
+    @GetMapping("/my-quizzes")
+    fun getAllResultsForCreatedQuizzes(@CurrentUser currentUser: CustomUserDetails?): ListWrapper<QuizResultsDto> {
+        return resultService.getResultsForQuizzesCreatedByMe(currentUser)
     }
 }

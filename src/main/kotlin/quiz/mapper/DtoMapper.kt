@@ -23,7 +23,12 @@ interface DtoMapper {
     @Mappings(Mapping(target = "resultId", source = "id"))
     fun resultToDto(result: Result): ResultDto
 
-    fun answersToDtos(results: List<Answer>): List<AnswerDto>
+    @Mappings(Mapping(target = "name", source = "user.name"))
+    fun resultToSmallDto(result: Result): ResultSmallDto
+
+    fun resultsToSmallDtos(results: List<Result>): List<ResultSmallDto>
+
+    fun answersToDtos(answers: List<Answer>): List<AnswerDto>
 
     @Mappings(Mapping(target = "questionId", source = "question.id"))
     fun questionToDto(question: Question, answers: List<Answer>): QuestionDto {
@@ -32,6 +37,16 @@ interface DtoMapper {
             question.text,
             question.multiple,
             answersToDtos(answers)
+        )
+    }
+
+    @Mappings(Mapping(target = "quizId", source = "quiz.id"))
+    fun quizToQuizResultsDto(quiz: Quiz, questionsNumber: Int, results: List<Result>): QuizResultsDto {
+        return QuizResultsDto(
+            quiz.id,
+            quiz.title,
+            questionsNumber,
+            resultsToSmallDtos(results)
         )
     }
 }

@@ -49,7 +49,7 @@ class QuizController(private val quizService: QuizService) {
     @GetMapping("/{quizId}/questions")
     fun getQuizQuestions(
         @PathVariable("quizId") quizId: Long,
-    ): QuestionDtoList {
+    ): ListWrapper<QuestionDto> {
         return quizService.getQuizQuestions(quizId)
     }
 

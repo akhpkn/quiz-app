@@ -27,12 +27,10 @@ class QuestionService(
         val diff = answers.count { it.correct } - answers.count { !it.correct }
         val correctAnswers = if (diff > 0) diff else 0
 
-        val quizAnswers = answerRepository.findAnswersByQuizId(quiz.id)
-
         val result = resultRepository.findResultByQuizIdAndUserId(quiz.id, user.id) ?: Result(user, quiz)
 
         result.correctAnswers += correctAnswers
-        result.score = 1.0 * result.correctAnswers / quizAnswers.count { it.correct }
+        result.score = 1.0 * result.correctAnswers / quiz.correctAnswers
         resultRepository.save(result)
     }
 }

@@ -85,4 +85,9 @@ class QuizController(private val quizService: QuizService) {
     ): ResultDto {
         return quizService.sendAnswers(quizId, selectedAnswers, currentUser)
     }
+
+    @PutMapping("/init-corr-ans")
+    fun initCorrectAnswersNumber() {
+        quizService.initCorrectAnswers()
+    }
 }

@@ -31,8 +31,9 @@ class QuizService(
         val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
         val questionRequests = quizCreationRequest.questions
+        val correctAnswers = questionRequests.flatMap { it.answers }.count { it.correct }
 
-        val quiz = Quiz(quizCreationRequest.title, user, code, questionRequests.size)
+        val quiz = Quiz(quizCreationRequest.title, user, code, questionRequests.size, correctAnswers)
         val savedQuiz = quizRepository.save(quiz)
 
         questionRequests.forEach { questionRequest ->
@@ -52,7 +53,7 @@ class QuizService(
         val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
 
-        val quiz = Quiz(blankQuizRequest.title, user, code, 0)
+        val quiz = Quiz(blankQuizRequest.title, user, code, 0, 0)
         val savedQuiz = quizRepository.save(quiz)
 
         return dtoMapper.quizToBlankDto(savedQuiz)
@@ -67,6 +68,7 @@ class QuizService(
             throw QuizWriteAccessNotAllowedException(user.username, quizId)
         }
         quiz.questionsNumber++
+        quiz.correctAnswers += questionCreationRequest.answers.count { it.correct }
         val savedQuiz = quizRepository.save(quiz)
 
         val question = Question(questionCreationRequest.text, questionCreationRequest.multiple, savedQuiz)
@@ -163,12 +165,20 @@ class QuizService(
         }
         val result = Result(user, quiz)
 
-        val quizAnswers = answerRepository.findAnswersByQuizId(quizId)
         result.correctAnswers = totalCorrectAnswers
-        result.score = 1.0 * result.correctAnswers / quizAnswers.count { it.correct }
+        result.score = 1.0 * result.correctAnswers / quiz.correctAnswers
 
         val savedResult = resultRepository.save(result)
         return dtoMapper.resultToDto(savedResult)
+    }
+
+    fun initCorrectAnswers() {
+        val quizzes = quizRepository.findAllQuizzes()
+        quizzes.forEach { quiz ->
+            val correctAnswers = answerRepository.findAnswersByQuizId(quiz.id).count { it.correct }
+            quiz.correctAnswers = correctAnswers
+        }
+        quizRepository.saveAll(quizzes)
     }
 
     private fun validateSelectedAnswersAndGetQuiz(quizId: Long, answers: List<Answer>): Quiz {

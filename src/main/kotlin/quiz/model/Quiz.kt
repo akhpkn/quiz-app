@@ -14,6 +14,9 @@ class Quiz(
     var code: String,
 
     var questionsNumber: Int,
+
+    @Column(name = "correct_answers")
+    var correctAnswers: Int,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

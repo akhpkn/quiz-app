@@ -11,7 +11,7 @@ import quiz.service.QuestionService
 @RequestMapping("/api/question")
 class QuestionController(private val questionService: QuestionService) {
 
-    @PostMapping("/{questionId}")
+    @PutMapping("/{questionId}")
     @ApiOperation("Метод для выбора ответов на вопрос квиза")
     fun chooseAnswers(
         @PathVariable("questionId") questionId: Long,

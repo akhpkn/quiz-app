@@ -6,6 +6,7 @@ import quiz.dto.QuizResultsDto
 import quiz.dto.ResultDto
 import quiz.exception.ResultNotFoundException
 import quiz.mapper.DtoMapper
+import quiz.repository.QuizRepository
 import quiz.repository.ResultRepository
 import quiz.security.AuthManager
 import quiz.security.CustomUserDetails
@@ -13,6 +14,7 @@ import quiz.security.CustomUserDetails
 @Service
 class ResultService(
     private val resultRepository: ResultRepository,
+    private val quizRepository: QuizRepository,
     private val authManager: AuthManager,
     private val dtoMapper: DtoMapper,
 ) {
@@ -29,11 +31,13 @@ class ResultService(
     fun getResultsForQuizzesCreatedByMe(currentUser: CustomUserDetails?): ListWrapper<QuizResultsDto> {
         val user = authManager.getAuthorizedUser(currentUser)
         val results = resultRepository.findResultsForQuizzesCreatedByUser(user)
+        val quizzes = quizRepository.findQuizzesByAuthorId(user.id)
 
         return ListWrapper(
-            results
-                .groupBy { it.quiz }
-                .map { (quiz, results) -> dtoMapper.quizToQuizResultsDto(quiz, results) }
+            quizzes.map { quiz ->
+                val quizResults = results.filter { it.quiz == quiz }
+                dtoMapper.quizToQuizResultsDto(quiz, quizResults)
+            }
         )
     }
 }

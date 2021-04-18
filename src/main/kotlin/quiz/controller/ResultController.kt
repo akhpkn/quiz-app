@@ -1,5 +1,6 @@
 package quiz.controller
 
+import io.swagger.annotations.ApiOperation
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -16,6 +17,7 @@ import quiz.service.ResultService
 class ResultController(private val resultService: ResultService) {
 
     @GetMapping
+    @ApiOperation("Метод для получения результата пользователя по квизу")
     fun getResultForQuiz(
         @RequestParam("userId") userId: Long,
         @RequestParam("quizId") quizId: Long,
@@ -24,6 +26,7 @@ class ResultController(private val resultService: ResultService) {
     }
 
     @GetMapping("/my-quizzes")
+    @ApiOperation("Метод для получения всех результатов по всем квизам, созданных авторизованным пользователем")
     fun getAllResultsForCreatedQuizzes(@CurrentUser currentUser: CustomUserDetails?): ListWrapper<QuizResultsDto> {
         return resultService.getResultsForQuizzesCreatedByMe(currentUser)
     }

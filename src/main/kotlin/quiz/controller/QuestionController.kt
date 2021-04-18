@@ -1,5 +1,6 @@
 package quiz.controller
 
+import io.swagger.annotations.ApiOperation
 import org.springframework.web.bind.annotation.*
 import quiz.dto.SelectedAnswers
 import quiz.security.CurrentUser
@@ -11,6 +12,7 @@ import quiz.service.QuestionService
 class QuestionController(private val questionService: QuestionService) {
 
     @PostMapping("/{questionId}")
+    @ApiOperation("Метод для выбора ответов на вопрос квиза")
     fun chooseAnswers(
         @PathVariable("questionId") questionId: Long,
         @RequestBody selectedAnswers: SelectedAnswers,

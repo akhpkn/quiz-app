@@ -45,6 +45,7 @@ interface DtoMapper {
         return QuizResultsDto(
             quiz.id,
             quiz.title,
+            quiz.code,
             quiz.questionsNumber,
             resultsToSmallDtos(results)
         )

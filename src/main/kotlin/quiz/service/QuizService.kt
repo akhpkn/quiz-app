@@ -30,7 +30,7 @@ class QuizService(
     fun createQuiz(quizCreationRequest: QuizCreationRequest, currentUser: CustomUserDetails?): BlankQuizDto {
         val user: User = authManager.getAuthorizedUser(currentUser)
         val code = generateCode().also { usedCodes.add(it) }
-        val questionRequests = quizCreationRequest.questions
+        val questionRequests = quizCreationRequest.list
         val correctAnswers = questionRequests.flatMap { it.answers }.count { it.correct }
 
         val quiz = Quiz(quizCreationRequest.title, user, code, questionRequests.size, correctAnswers)

@@ -15,7 +15,6 @@ class Quiz(
 
     var questionsNumber: Int,
 
-    @Column(name = "correct_answers")
     var correctAnswers: Int,
 ) {
     @Id

@@ -172,15 +172,6 @@ class QuizService(
         return dtoMapper.resultToDto(savedResult)
     }
 
-    fun initCorrectAnswers() {
-        val quizzes = quizRepository.findAllQuizzes()
-        quizzes.forEach { quiz ->
-            val correctAnswers = answerRepository.findAnswersByQuizId(quiz.id).count { it.correct }
-            quiz.correctAnswers = correctAnswers
-        }
-        quizRepository.saveAll(quizzes)
-    }
-
     private fun validateSelectedAnswersAndGetQuiz(quizId: Long, answers: List<Answer>): Quiz {
         val quiz = quizRepository.findQuizById(quizId) ?: throw QuizNotFoundException(quizId)
         val quizIds = answers.map { it.question.quiz.id }.toSet()

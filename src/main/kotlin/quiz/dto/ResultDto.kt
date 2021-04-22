@@ -5,4 +5,5 @@ class ResultDto(
     var user: UserDto,
     var quiz: BlankQuizDto,
     var score: Double,
+    var correctAnswers: Int,
 )
